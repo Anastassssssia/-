@@ -5,11 +5,11 @@
 
     2.  Створити компаратори класу за різними можливими способами сортування екземплярів класу.
 
-    3.  Створити колекцію екземплярів класу та виконати сортування елементів колекції з використанням алгоритмів звичайного сортування та сортування з  паралельними обчисленнями, 
-        реалізованих у стандартних бібліотеках Java. Використовуйте як сортування за одним критерієм, так і за кількома одночасно. Наприклад, відсортувати готелі міста за категорією 
+    3.  Створити колекцію екземплярів класу та виконати сортування елементів колекції з використанням алгоритмів звичайного сортування та сортування з  паралельними обчисленнями,
+        реалізованих у стандартних бібліотеках Java. Використовуйте як сортування за одним критерієм, так і за кількома одночасно. Наприклад, відсортувати готелі міста за категорією
         та за назвою міста розташування.
 
-    4.  Збільшуючи обсяг масиву, що сортується, вимірювати час виконання програми. 
+    4.  Збільшуючи обсяг масиву, що сортується, вимірювати час виконання програми.
         Побудувати графік залежності часу виконання програми від розміру масиву для методу звичайного сортування та сортування з паралельними обчисленнями. Порівняти результати та зробити висновки.
 
 Варіант 5 - Авто з полями Номер авто, Тип, Об’єм двигуна, Вартість.
@@ -53,28 +53,28 @@ void sort_carNumber(vector<Car>& list, int start_id, int end_id) {
         }
         sort_carNumber(list, start_id + 1, end_id);
     }
-    cout << "Сортування за номером авто завершено" << endl;
+    //cout << "Сортування за номером авто завершено" << endl;
 }
 
-void start_carNumber(vector<Car> list,int start_id, int end_id) {
+void start_carNumber(vector<Car> list, int start_id, int end_id) {
     sort_carNumber(list, start_id, end_id);
-    cout << "Сортування за номером авто виконано в окремому потоці" << endl;
+    //cout << "Сортування за номером авто виконано в окремому потоці" << endl;
 }
 
 void sort_type(vector<Car>& list, int start_id, int end_id) {
-    for(int now = 0; now < end_id - 1; ++now){
+    for (int now = 0; now < end_id - 1; ++now) {
         for (int i = start_id + now; i < end_id; ++i) {
             if (list[start_id].type > list[i].type) {
                 swap(list[start_id], list[i]);
             }
         }
     }
-    cout << "Сортування за типом авто завершено" << endl;
+    //cout << "Сортування за типом авто завершено" << endl;
 }
 
 void start_type(vector<Car> list, int start_id, int end_id) {
     sort_type(list, start_id, end_id);
-    cout << "Сортування за типом авто виконано в окремому потоці" << endl;
+    //cout << "Сортування за типом авто виконано в окремому потоці" << endl;
 }
 
 void sort_engineSize(vector<Car>& list, int start_id, int end_id) {
@@ -85,12 +85,12 @@ void sort_engineSize(vector<Car>& list, int start_id, int end_id) {
             }
         }
     }
-    cout << "Сортування за об'ємом двигуна завершено" << endl;
+    //cout << "Сортування за об'ємом двигуна завершено" << endl;
 }
 
 void start_engineSize(vector<Car> list, int start_id, int end_id) {
     sort_engineSize(list, start_id, end_id);
-    cout << "Сортування за об'ємом двигуна виконано в окремому потоці" << endl;
+    // cout << "Сортування за об'ємом двигуна виконано в окремому потоці" << endl;
 }
 
 void sort_cost(vector<Car>& list, int start_id, int end_id) {
@@ -101,15 +101,15 @@ void sort_cost(vector<Car>& list, int start_id, int end_id) {
             }
         }
     }
-    cout << "Сортування за вартістю авто завершено" << endl;
+    //cout << "Сортування за вартістю авто завершено" << endl;
 }
 
 void start_cost(vector<Car> list, int start_id, int end_id) {
     sort_cost(list, start_id, end_id);
-    cout << "Сортування за вартістю авто виконано в окремому потоці" << endl;
+    //cout << "Сортування за вартістю авто виконано в окремому потоці" << endl;
 }
 
-vector<Car> createList( int size) {
+vector<Car> createList(int size) {
     random_device rd;
     mt19937 gen(rd());
     uniform_int_distribution<> distrib(0, 1000);
@@ -135,6 +135,9 @@ vector<Car> createList( int size) {
 
 int main()
 {
+    SetConsoleCP(1251);
+    SetConsoleOutputCP(1251);
+
     int size = 100;
     //======================================================================================================================
     cout << "=== Початок виконання сортування в потоках ===" << endl;
@@ -146,7 +149,7 @@ int main()
 
     auto start = chrono::high_resolution_clock::now();
 
-    thread th1(&start_carNumber, listCar1,0, size);
+    thread th1(&start_carNumber, listCar1, 0, size);
     thread th2(&start_type, listCar2, 0, size);
     thread th3(&start_engineSize, listCar3, 0, size);
     thread th4(&start_cost, listCar4, 0, size);
@@ -157,13 +160,13 @@ int main()
     th4.join();
 
     auto end = chrono::high_resolution_clock::now();
-    
+
     chrono::duration<double> elapsedTime = end - start;
 
     cout << "Час виконання з потоками: " << elapsedTime.count() << " секунд" << endl;
-    
+
     //======================================================================================================================
-    cout << "=== Початок виконання сортування без потоків ===" << endl;
+    cout << "\n=== Початок виконання сортування без потоків ===" << endl;
 
     listCar1 = createList(size);
     listCar2 = createList(size);
@@ -171,16 +174,16 @@ int main()
     listCar4 = createList(size);
 
     start = chrono::high_resolution_clock::now();
-    sort_carNumber(listCar1, 0, size);
-    sort_engineSize(listCar2, 0, size);
-    sort_engineSize(listCar3, 0, size);
-    sort_engineSize(listCar4, 0, size);
+    start_carNumber(listCar1, 0, size);
+    start_type(listCar2, 0, size);
+    start_engineSize(listCar3, 0, size);
+    start_cost(listCar4, 0, size);
     end = chrono::high_resolution_clock::now();
 
     elapsedTime = end - start;
 
     cout << "Час виконання без потоків: " << elapsedTime.count() << " секунд" << endl;
-    
+
     return 1;
 }
 
