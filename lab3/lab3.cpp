@@ -1,0 +1,179 @@
+﻿/*Завдання до лабораторної роботи 2
+    1.  Створіть програму імітації руху більярдної кульки. Динаміка руху кульки задана класом Ball (див. лістинг). Розробіть графічний інтерфейс до програми для спостереження руху кульки.
+
+    2.  Модифікуйте програму так, щоб кожна нова створювана кулька відтворювала свій рух в новому потоці. Спостерігайте роботу програми при збільшенні кількості кульок. 
+        Поясніть результати спостереження. Опишіть переваги потокової архітектури програм.
+
+    3.  Модифікуйте програму так, щоб кульки червоного створювались з вищим пріоритетом, ніж кульки синього кольору. Для створення кульок червоного та синього кольору створіть відповідні кнопки в графічному інтерфейсі користувача. 
+        Спостерігайте рух червоних та синіх кульок при збільшенні загальної кількості кульок. Поясніть результат спостереження.
+*/
+
+#include <iostream>
+#include <windows.h>
+#include <sstream>
+#include <thread>
+#include <chrono>
+#include <mutex>
+
+#include <random>
+#include <vector>
+#include <functional>
+
+using namespace std;
+
+enum CarType {
+    A, B, C, D, E, F, S,
+};
+
+class Car {
+public:
+    int carNumber;
+    CarType type;
+    double engineSize;
+    double cost;
+
+    void print() {
+        cout << "Автомобіль (" << carNumber << ", тип: " << type << ", об'єм двигуна: " << engineSize << ", вартість: " << cost << ")" << endl;
+    }
+};
+
+void sort_carNumber(vector<Car>& list, int start_id, int end_id) {
+    if (start_id < end_id) {
+        for (int i = start_id; i < end_id; ++i) {
+            if (list[start_id].carNumber > list[i].carNumber) {
+                swap(list[start_id], list[i]);
+            }
+        }
+        sort_carNumber(list, start_id + 1, end_id);
+    }
+    cout << "Сортування за номером авто завершено" << endl;
+}
+
+void start_carNumber(vector<Car> list,int start_id, int end_id) {
+    sort_carNumber(list, start_id, end_id);
+    cout << "Сортування за номером авто виконано в окремому потоці" << endl;
+}
+
+void sort_type(vector<Car>& list, int start_id, int end_id) {
+    for(int now = 0; now < end_id - 1; ++now){
+        for (int i = start_id + now; i < end_id; ++i) {
+            if (list[start_id].type > list[i].type) {
+                swap(list[start_id], list[i]);
+            }
+        }
+    }
+    cout << "Сортування за типом авто завершено" << endl;
+}
+
+void start_type(vector<Car> list, int start_id, int end_id) {
+    sort_type(list, start_id, end_id);
+    cout << "Сортування за типом авто виконано в окремому потоці" << endl;
+}
+
+void sort_engineSize(vector<Car>& list, int start_id, int end_id) {
+    for (int now = 0; now < end_id - 1; ++now) {
+        for (int i = start_id + now; i < end_id; ++i) {
+            if (list[start_id].engineSize > list[i].engineSize) {
+                swap(list[start_id], list[i]);
+            }
+        }
+    }
+    cout << "Сортування за об'ємом двигуна завершено" << endl;
+}
+
+void start_engineSize(vector<Car> list, int start_id, int end_id) {
+    sort_engineSize(list, start_id, end_id);
+    cout << "Сортування за об'ємом двигуна виконано в окремому потоці" << endl;
+}
+
+void sort_cost(vector<Car>& list, int start_id, int end_id) {
+    for (int now = 0; now < end_id - 1; ++now) {
+        for (int i = start_id + now; i < end_id; ++i) {
+            if (list[start_id].cost > list[i].cost) {
+                swap(list[start_id], list[i]);
+            }
+        }
+    }
+    cout << "Сортування за вартістю авто завершено" << endl;
+}
+
+void start_cost(vector<Car> list, int start_id, int end_id) {
+    sort_cost(list, start_id, end_id);
+    cout << "Сортування за вартістю авто виконано в окремому потоці" << endl;
+}
+
+vector<Car> createList( int size) {
+    random_device rd;
+    mt19937 gen(rd());
+    uniform_int_distribution<> distrib(0, 1000);
+    uniform_int_distribution<> distrib2(0, 100);
+    uniform_int_distribution<> distrib_Type(0, 6);
+
+
+    vector<Car> listCar;
+    vector<CarType> listType{ CarType::A, CarType::B, CarType::C, CarType::D, CarType::E, CarType::F, CarType::S };
+    for (int i = 0; i < size; ++i) {
+        int random_carNumber = distrib(gen);
+        int random_Type = distrib_Type(gen);
+        double random_engineSize = distrib(gen);
+        double random_engineSize_point = distrib2(gen);
+        double random_cost = distrib(gen);
+        double random_cost_point = distrib2(gen);
+
+        Car A{ random_carNumber, listType[random_Type], random_engineSize + random_engineSize_point / 100, random_cost + random_cost_point / 100 };
+        listCar.push_back(A);
+    }
+    return listCar;
+}
+
+int main()
+{
+    int size = 100;
+    //======================================================================================================================
+    cout << "=== Початок виконання сортування в потоках ===" << endl;
+
+    vector<Car> listCar1 = createList(size);
+    vector<Car> listCar2 = createList(size);
+    vector<Car> listCar3 = createList(size);
+    vector<Car> listCar4 = createList(size);
+
+    auto start = chrono::high_resolution_clock::now();
+
+    thread th1(&start_carNumber, listCar1,0, size);
+    thread th2(&start_type, listCar2, 0, size);
+    thread th3(&start_engineSize, listCar3, 0, size);
+    thread th4(&start_cost, listCar4, 0, size);
+
+    th1.join();
+    th2.join();
+    th3.join();
+    th4.join();
+
+    auto end = chrono::high_resolution_clock::now();
+    
+    chrono::duration<double> elapsedTime = end - start;
+
+    cout << "Час виконання з потоками: " << elapsedTime.count() << " секунд" << endl;
+    
+    //======================================================================================================================
+    cout << "=== Початок виконання сортування без потоків ===" << endl;
+
+    listCar1 = createList(size);
+    listCar2 = createList(size);
+    listCar3 = createList(size);
+    listCar4 = createList(size);
+
+    start = chrono::high_resolution_clock::now();
+    sort_carNumber(listCar1, 0, size);
+    sort_engineSize(listCar2, 0, size);
+    sort_engineSize(listCar3, 0, size);
+    sort_engineSize(listCar4, 0, size);
+    end = chrono::high_resolution_clock::now();
+
+    elapsedTime = end - start;
+
+    cout << "Час виконання без потоків: " << elapsedTime.count() << " секунд" << endl;
+    
+    return 1;
+}
+
