@@ -38,10 +38,6 @@ public:
     CarType type;
     double engineSize;
     double cost;
-
-    void print() {
-        cout << "Автомобіль (" << carNumber << ", тип: " << type << ", об'єм двигуна: " << engineSize << ", вартість: " << cost << ")" << endl;
-    }
 };
 
 void sort_carNumber(vector<Car>& list, int start_id, int end_id) {
@@ -53,12 +49,6 @@ void sort_carNumber(vector<Car>& list, int start_id, int end_id) {
         }
         sort_carNumber(list, start_id + 1, end_id);
     }
-}
-
-void start_carNumber(vector<Car>& list, int start_id, int end_id) {
-    cout << "Сортування за номером авто виконано в окремому потоці" << endl;
-    sort_carNumber(list, start_id, end_id);
-    cout << "Сортування за номером авто завершено" << endl;
 }
 
 void sort_type(vector<Car>& list, int start_id, int end_id) {
@@ -73,11 +63,6 @@ void sort_type(vector<Car>& list, int start_id, int end_id) {
 
 }
 
-void start_type(vector<Car>& list, int start_id, int end_id) {
-    cout << "Сортування за типом авто виконано в окремому потоці" << endl;
-    sort_type(list, start_id, end_id);
-    cout << "Сортування за типом авто завершено" << endl;
-}
 
 void sort_engineSize(vector<Car>& list, int start_id, int end_id) {
     if (start_id < end_id) {
@@ -91,11 +76,6 @@ void sort_engineSize(vector<Car>& list, int start_id, int end_id) {
 
 }
 
-void start_engineSize(vector<Car>& list, int start_id, int end_id) {
-    cout << "Сортування за об'ємом двигуна завершено" << endl;
-    sort_engineSize(list, start_id, end_id);
-    cout << "Сортування за об'ємом двигуна виконано в окремому потоці" << endl;
-}
 
 void sort_cost(vector<Car>& list, int start_id, int end_id) {
     if (start_id < end_id) {
@@ -108,11 +88,6 @@ void sort_cost(vector<Car>& list, int start_id, int end_id) {
     }
 }
 
-void start_cost(vector<Car>& list, int start_id, int end_id) {
-    cout << "Сортування за вартістю авто завершено" << endl;
-    sort_cost(list, start_id, end_id);
-    cout << "Сортування за вартістю авто виконано в окремому потоці" << endl;
-}
 
 vector<Car> createList(int size) {
     random_device rd;
@@ -154,10 +129,10 @@ int main()
 
     auto start = chrono::high_resolution_clock::now();
 
-    thread th1(&start_carNumber, ref(listCar1), 0, size);
-    thread th2(&start_type, ref(listCar2), 0, size);
-    thread th3(&start_engineSize, ref(listCar3), 0, size);
-    thread th4(&start_cost, ref(listCar4), 0, size);
+    thread th1(&sort_carNumber, ref(listCar1), 0, size);
+    thread th2(&sort_type, ref(listCar2), 0, size);
+    thread th3(&sort_engineSize, ref(listCar3), 0, size);
+    thread th4(&sort_cost, ref(listCar4), 0, size);
 
     th1.join();
     th2.join();
@@ -179,10 +154,12 @@ int main()
     listCar4 = createList(size);
 
     start = chrono::high_resolution_clock::now();
-    start_carNumber(listCar1, 0, size);
-    start_type(listCar2, 0, size);
-    start_engineSize(listCar3, 0, size);
-    start_cost(listCar4, 0, size);
+
+    sort_carNumber(listCar1, 0, size);
+    sort_type(listCar2, 0, size);
+    sort_engineSize(listCar3, 0, size);
+    sort_cost(listCar4, 0, size);
+
     end = chrono::high_resolution_clock::now();
 
     elapsedTime = end - start;
